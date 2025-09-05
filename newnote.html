@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Nuova Nota - Nota Bene</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<header>
+  <div class="navbar">
+    <div class="site-title">Nota Bene</div>
+    <div class="profile">
+      <p>Utente: <span id="user-email"></span></p>
+      <a href="home.html">Home</a> |
+      <a href="login.html">Logout</a>
+    </div>
+  </div>
+</header>
+
+<div class="container">
+  <section class="new-note-section">
+    <h2>Nuova nota</h2>
+    <form id="noteForm">
+      <label for="noteText">Contenuto della nota:</label>
+      <textarea id="noteText" rows="4" maxlength="280" placeholder="Scrivi la tua nota..." required></textarea>
+
+      <label for="noteTags">Tag (separati da virgola):</label>
+      <input type="text" id="noteTags" placeholder="es. #studio, #esami, #università" />
+
+      <label for="noteFolder">Cartella:</label>
+      <input type="text" id="noteFolder" placeholder="es. Lezioni, Progetti, Annunci" />
+
+      <fieldset>
+        <legend>Visibilità:</legend>
+        <label><input type="radio" name="visibility" value="public" checked> Pubblica</label>
+        <label><input type="radio" name="visibility" value="private"> Privata</label>
+      </fieldset>
+
+      <button type="submit" class="add-note-btn">Salva Nota</button>
+      <p id="noteMessage"></p>
+    </form>
+  </section>
+</div>
+
+<footer>
+  <small>&copy; 2025 Nota Bene - Università di Bologna</small>
+</footer>
+
+<script src="script.js"></script>
+
+</body>
+</html>
