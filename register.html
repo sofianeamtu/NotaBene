@@ -3,28 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <title>Registrazione</title>
-  <script defer>
-    document.addEventListener('DOMContentLoaded', () => {
-      const form = document.getElementById('registerForm');
-      const message = document.getElementById('message');
-
-      form.addEventListener('submit', function (e) {
-        const pass1 = document.getElementById('regPassword').value.trim();
-        const pass2 = document.getElementById('regConfirmPassword').value.trim();
-
-        if (pass1 !== pass2) {
-          e.preventDefault();
-          message.textContent = 'Le password non coincidono.';
-        } else {
-          message.textContent = '';
-          // In un'app reale salveresti qui i dati.
-          alert('Registrazione completata con successo!');
-          window.location.href = 'login.html';
-        }
-      });
-    });
-  </script>
-
+  <script src="script.js" defer></script>
   <style>
     body {
   background: #e8f4f8;

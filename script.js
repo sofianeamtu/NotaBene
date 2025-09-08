@@ -3,7 +3,19 @@ document.addEventListener("DOMContentLoaded", () => {
   const registerForm = document.getElementById("registerForm");
   const loginForm = document.getElementById("loginForm");
 
-  // --- LOGIN/REGISTER (se presenti su questa pagina) ---
+  // --- Utility ---
+  function isProtectedPage() {
+    const path = location.pathname.toLowerCase();
+    return path.endsWith('/home.html') ||
+           path.endsWith('/newnote.html') ||
+           path.endsWith('/profile.html');
+  }
+  function getLoggedUser() {
+    return localStorage.getItem("utenteLoggato");
+  }
+  const USER_NOTES_KEY = (u) => `userNotes_${u}`;
+
+  // --- REGISTER ---
   if (registerForm) {
     registerForm.addEventListener("submit", (e) => {
       e.preventDefault();
@@ -11,13 +23,13 @@ document.addEventListener("DOMContentLoaded", () => {
       const password = document.getElementById("regPassword").value;
 
       if (!username || !password) {
-        messageDiv.textContent = "Compila tutti i campi.";
+        if (messageDiv) messageDiv.textContent = "Compila tutti i campi.";
         return;
       }
 
       const users = JSON.parse(localStorage.getItem("users") || "{}");
       if (users[username]) {
-        messageDiv.textContent = "Utente già registrato.";
+        if (messageDiv) messageDiv.textContent = "Utente già registrato.";
         return;
       }
 
@@ -29,6 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // --- LOGIN ---
   if (loginForm) {
     loginForm.addEventListener("submit", (e) => {
       e.preventDefault();
@@ -36,14 +49,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const password = document.getElementById("loginPassword").value;
 
       const users = JSON.parse(localStorage.getItem("users") || "{}");
-
       if (!users[username]) {
-        messageDiv.textContent = "Utente non registrato.";
+        if (messageDiv) messageDiv.textContent = "Utente non registrato.";
         return;
       }
-
       if (users[username] !== password) {
-        messageDiv.textContent = "Password errata.";
+        if (messageDiv) messageDiv.textContent = "Password errata.";
         return;
       }
 
@@ -52,20 +63,18 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // --- Header + redirect solo su pagine protette ---
   function mostraEmailUtente() {
-    const username = localStorage.getItem("utenteLoggato");
-    if (username) {
-      const userEmailSpan = document.getElementById("user-email");
-      if (userEmailSpan) {
-        userEmailSpan.textContent = username;
-      }
-    } else {
+    const username = getLoggedUser();
+    const userEmailSpan = document.getElementById("user-email");
+    if (userEmailSpan) userEmailSpan.textContent = username || 'ospite';
+    if (isProtectedPage() && !username) {
       window.location.href = "login.html";
     }
   }
-
   mostraEmailUtente();
 
+  // --- Sidebar dinamica (tag/cartelle) ---
   function aggiornaSidebarTagsECartelle(note) {
     const tagList = document.getElementById("dynamic-tag-list");
     const folderList = document.getElementById("dynamic-folder-list");
@@ -87,7 +96,6 @@ document.addEventListener("DOMContentLoaded", () => {
       li.innerHTML = `<a href="#" data-filter-type="tag" data-filter-value="${tag}">#${tag}</a>`;
       tagList.appendChild(li);
     });
-
     [...allFolders].sort().forEach(folder => {
       const li = document.createElement("li");
       li.innerHTML = `<a href="#" data-filter-type="folder" data-filter-value="${folder}">${folder}</a>`;
@@ -102,10 +110,12 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
+  // --- Home: mostra note pubbliche ---
   function mostraNotePubbliche(filterType = null, filterValue = null) {
     const contenitore = document.querySelector(".notes-list");
-    contenitore.innerHTML = "";
+    if (!contenitore) return; // pagina senza lista note (es. login/register)
 
+    contenitore.innerHTML = "";
     const notePubbliche = JSON.parse(localStorage.getItem("notePubbliche") || "[]");
     let noteDaMostrare = notePubbliche;
 
@@ -119,6 +129,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (noteDaMostrare.length === 0) {
       contenitore.innerHTML = "<p>Nessuna nota pubblica disponibile.</p>";
+      aggiornaSidebarTagsECartelle([]);
       return;
     }
 
@@ -128,7 +139,7 @@ document.addEventListener("DOMContentLoaded", () => {
       div.innerHTML = `
         <p>${n.testo}</p>
         <p><small>Autore: ${n.autore}</small></p>
-        <p><small>Tag: ${n.tag.join(", ")}</small></p>
+        <p><small>Tag: ${(n.tag || []).join(", ") || "—"}</small></p>
         <p><small>Cartella: ${n.cartella || "Nessuna"}</small></p>
       `;
       contenitore.appendChild(div);
@@ -137,66 +148,79 @@ document.addEventListener("DOMContentLoaded", () => {
     aggiornaSidebarTagsECartelle(noteDaMostrare);
   }
 
+  // --- New note: salvataggio ---
   const noteForm = document.getElementById("noteForm");
   if (noteForm) {
     noteForm.addEventListener("submit", (e) => {
       e.preventDefault();
 
       const noteText = document.getElementById("noteText").value.trim();
-      const noteTags = document.getElementById("noteTags").value.trim().split(",").map(t => t.trim().toLowerCase()).filter(t => t);
+      const noteTags = document.getElementById("noteTags").value
+        .trim().split(",").map(t => t.trim().toLowerCase()).filter(Boolean);
       const noteFolder = document.getElementById("noteFolder").value.trim();
+
+      // IMPORTANTE: assicurati che i radio in newnote.html abbiano value="pubblica" / "privata"
       const publicRadio = document.querySelector('input[name="noteVisibility"]:checked');
       const isPublic = publicRadio ? publicRadio.value === "pubblica" : false;
 
-      const username = localStorage.getItem("utenteLoggato");
+      const username = getLoggedUser();
       if (!noteText || !username) return;
 
       const nuovaNota = {
         content: noteText,
-        tags: noteTags.join(", "),
+        tags: noteTags.join(", "),       // salviamo come stringa, poi la splitteremo
         folder: noteFolder,
         public: isPublic,
-        allowEdit: false
+        allowEdit: false,
+        createdAt: new Date().toISOString()
       };
 
-      const userNotes = JSON.parse(localStorage.getItem("userNotes") || "[]");
+      // Salva note per-utente
+      const userKey = USER_NOTES_KEY(username);
+      const userNotes = JSON.parse(localStorage.getItem(userKey) || "[]");
       userNotes.unshift(nuovaNota);
-      localStorage.setItem("userNotes", JSON.stringify(userNotes));
+      localStorage.setItem(userKey, JSON.stringify(userNotes));
 
+      // Se pubblica, aggiorna la bacheca pubblica SOLO con questa nota
       if (isPublic) {
-        aggiornaNotePubbliche(username);
+        aggiornaNotePubbliche(username, [nuovaNota]);
       }
 
-      noteForm.reset();
+      // Feedback + redirect
       const noteMessage = document.getElementById("noteMessage");
       if (noteMessage) {
         noteMessage.textContent = "Nota salvata!";
         noteMessage.style.color = "#28a745";
       }
-
-      mostraNotePubbliche();
+      // Vai in Home (o "profile.html" se preferisci)
+      setTimeout(() => { window.location.href = "home.html"; }, 400);
     });
   }
 
-  function aggiornaNotePubbliche(username) {
-    const allUsers = JSON.parse(localStorage.getItem("users") || "{}");
-    const noteUtente = JSON.parse(localStorage.getItem("userNotes") || "[]");
+  // Aggiorna note pubbliche: append solo delle note passate
+  function aggiornaNotePubbliche(username, notesArray) {
+    const notePubbliche = JSON.parse(localStorage.getItem("notePubbliche") || "[]");
 
-    const notePubbliche = JSON.parse(localStorage.getItem("notePubbliche") || "[]")
-      .filter(n => n.autore !== username);
+    // Evita duplicati (stesso autore + stesso testo + stessa cartella)
+    const uniqKey = (n) => `${n.autore}__${n.testo}__${n.cartella || ""}`;
+    const esistenti = new Set(notePubbliche.map(uniqKey));
 
-    const nuoveNote = noteUtente.filter(n => n.public).map(n => ({
+    const nuoveNote = (notesArray || []).filter(n => n.public).map(n => ({
       autore: username,
       testo: n.content,
-      tag: (n.tags || "").split(",").map(t => t.trim().toLowerCase()),
-      cartella: n.folder,
+      tag: (n.tags || "").split(",").map(t => t.trim().toLowerCase()).filter(Boolean),
+      cartella: n.folder || "",
       data: new Date().toISOString(),
       allowEdit: n.allowEdit,
       public: true
-    }));
+    })).filter(n => !esistenti.has(uniqKey(n)));
 
-    localStorage.setItem("notePubbliche", JSON.stringify([...notePubbliche, ...nuoveNote]));
+    const aggiornate = [...nuoveNote, ...notePubbliche]; // most-recent first
+    localStorage.setItem("notePubbliche", JSON.stringify(aggiornate));
   }
 
-  mostraNotePubbliche();
+  // Mostra bacheca pubblica solo se la pagina la contiene
+  if (document.querySelector(".notes-list")) {
+    mostraNotePubbliche();
+  }
 });
