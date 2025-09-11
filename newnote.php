@@ -10,7 +10,13 @@ if (!isset($_SESSION['utente'])) {
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $autore = $_SESSION['utente'];
     $titolo = $_POST['titolo'] ?? '';
-    $testo = $_POST['testo'] ?? '';
+    $testo = trim($_POST['testo'] ?? '');
+    if (mb_strlen($testo, 'UTF-8') > 280) {
+        http_response_code(422); 
+        $_SESSION['flash_error'] = 'La nota non può superare 280 caratteri.';
+        header('Location: newnote.php'); 
+        exit;
+    }
     $tag = $_POST['tag'] ?? '';
     $cartella = $_POST['cartella'] ?? '';
     $pubblica = isset($_POST['pubblica']) ? 1 : 0;
@@ -190,7 +196,13 @@ $messaggio = "";
       <input type="text" name="titolo" placeholder="Titolo della nota" required>
 
       <label>Testo della nota</label>
-      <textarea name="testo" rows="10" placeholder="Scrivi la tua nota qui..." required></textarea>
+      <textarea name="testo" required maxlength="280" placeholder="Scrivi la nota (max 280 caratteri)"></textarea>
+      <span id="counter">0/280</span>
+      <script>
+        const ta = document.querySelector('textarea[name="testo"]');
+        const c  = document.getElementById('counter');
+        ta.addEventListener('input', () => c.textContent = `${ta.value.length}/280`);
+      </script>
 
       <label>Tag</label>
       <input type="text" name="tag" placeholder="Tag (es. scuola, personale)">
