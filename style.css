@@ -1,610 +1,111 @@
-body {
-    font-family: 'Roboto', sans-serif;
-    margin: 0;
-    background-color: #f0f4f8; 
-    color: #333;
-    line-height: 1.6;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    overflow-x: hidden; 
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+:root{
+  --bg: #f4f6fb;
+  --card: #ffffff;
+  --text: #1f2937;
+  --muted: #6b7280;
+  --brand: #2563eb;
+  --brand-600:#1d4ed8;
+  --success:#22c55e;
+  --success-700:#16a34a;
+  --danger:#ef4444;
+  --warn:#f59e0b;
+  --ring: rgba(37, 99, 235, .35);
+  --radius: 12px;
+  --shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
 }
 
-header {
-    background-color: #2c3e50; 
-    color: white;
-    padding: 20px 25px; 
-    margin-bottom: 40px; 
-    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.12); 
+body{
+  font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+  color: var(--text);
+  background: linear-gradient(180deg, #f7f9ff 0%, #f2f4fb 100%);
 }
 
-.navbar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    max-width: 1100px; 
-    margin: auto;
-    flex-wrap: wrap;
+a{ color: var(--brand); text-decoration: none; }
+a:hover{ text-decoration: underline; }
+
+.container, .wrap { max-width: 1100px; margin: 24px auto; padding: 0 16px; }
+
+.navbar{
+  position: sticky; top: 0; z-index: 50;
+  backdrop-filter: saturate(180%) blur(8px);
+  background: rgba(255,255,255,.7);
+  border-bottom: 1px solid #e5e7eb;
+}
+.navbar .inner{
+  max-width: 1100px; margin: 0 auto; padding: 10px 16px;
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+}
+.site-title{ font-weight: 800; letter-spacing:.2px; }
+.profile a{ margin-left: 10px; }
+
+.card, .section, .form-modifica, .note-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 22px;
+}
+.card:hover, .section:hover, .form-modifica:hover, .note-card:hover{
+  box-shadow: 0 12px 32px rgba(15,23,42,.12);
 }
 
-.site-title {
-    font-size: 2.2em; 
-    font-weight: 700;
-    margin: 0;
-    color: white;
-    letter-spacing: 0.8px; 
+h1,h2,h3{ margin: 0 0 12px 0; }
+.meta{
+  color: var(--muted);
+  font-size: .95em;
+  background: #f8fafc;
+  border-left: 4px solid var(--brand);
+  padding: 10px 12px;
+  border-radius: 8px;
 }
+.meta.warn{ border-left-color: var(--danger); }
 
-.profile {
-    text-align: right;
-    font-size: 0.95em;
+label{ display:block; margin-top: 14px; color:#334155; font-weight: 600; }
+input[type="text"], input[type="search"], textarea, select{
+  width: 100%; padding: 14px 16px; margin-top: 6px;
+  border: 1px solid #e5e7eb; border-radius: 10px; background:#fff;
+  transition: box-shadow .2s, border-color .2s;
+  font-size: 1rem;
 }
+input:focus, textarea:focus, select:focus{
+  outline: none; border-color: var(--brand);
+  box-shadow: 0 0 0 4px var(--ring);
+}
+textarea{ min-height: 180px; resize: vertical; }
 
-.profile p {
-    margin: 0 0 5px 0; 
-    color: #dbe4ee; 
-}
+.row{ display:flex; gap:16px; align-items:center; flex-wrap:wrap; }
 
-.profile a {
-    color: #87ceeb; 
-    text-decoration: none;
-    font-weight: 500;
-    transition: color 0.3s ease; 
+.btn, button, input[type="submit"]{
+  display:inline-flex; align-items:center; gap:8px;
+  background: var(--brand); color: #fff; border: none;
+  padding: 12px 18px; border-radius: 10px; cursor: pointer;
+  box-shadow: 0 6px 16px rgba(37,99,235,.25);
+  transition: transform .05s ease, box-shadow .2s ease, background .2s ease;
 }
+.btn:hover, button:hover{ background: var(--brand-600); text-decoration:none; }
+.btn:active, button:active{ transform: translateY(1px); box-shadow: 0 4px 12px rgba(37,99,235,.25); }
+.btn.secondary{ background:#f3f4f6; color:#111827; box-shadow:none; border:1px solid #e5e7eb; }
+.btn.success{ background: var(--success); }
+.btn.warn{ background: var(--warn); }
+.btn.danger{ background: var(--danger); }
 
-.profile a:hover {
-    color: #a7e0ff; 
-    text-decoration: underline;
+.list-item{
+  display:flex; justify-content:space-between; align-items:center;
+  padding: 14px 0; border-bottom: 1px solid #eef2f7;
 }
+.list-item:last-child{ border-bottom:none; }
 
-.container {
-    max-width: 1100px; 
-    margin: 0 auto;
-    padding: 0 25px;
+.badge{
+  display:inline-block; font-size:.8em; padding: 4px 10px;
+  border-radius: 999px; background:#eef2ff; border:1px solid #c7d2fe; color:#3730a3;
 }
+.badge.green{ background:#e9f8ee; border-color:#cfead8; color:#065f46; }
+.badge.yellow{ background:#fff7e6; border-color:#ffe2a6; color:#92400e; }
+.badge.gray{ background:#f3f4f6; border-color:#e5e7eb; color:#374151; }
 
-.welcome-section,
-.notes-section,
-.new-note-section {
-    background-color: #ffffff;
-    padding: 35px; 
-    margin-bottom: 40px; 
-    border-radius: 12px; 
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.08);
-    transition: box-shadow 0.3s ease;
-}
+.table{ width:100%; border-collapse: collapse; }
+.table th, .table td{ text-align:left; padding: 10px 8px; border-bottom:1px solid #eef2f7; }
+.table th{ color:#475569; font-weight:700; }
 
-.welcome-section:hover,
-.notes-section:hover,
-.new-note-section:hover {
-    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12); 
-}
-
-h1, h2 {
-    color: #2c3e50;
-    margin-top: 0;
-    font-weight: 700;
-}
-
-h1 {
-    font-size: 2.8em; 
-    text-align: center;
-    margin-bottom: 25px; 
-}
-
-h2 {
-    font-size: 2em; 
-    border-bottom: 2px solid #e0e6eb; 
-    padding-bottom: 15px; 
-    margin-bottom: 30px; 
-}
-
-.btn-primary {
-  background-color: #007bff; 
-  color: white;
-  border: none;
-  padding: 12px 25px; /* Padding generoso */
-  border-radius: 8px; /* Angoli arrotondati */
-  font-size: 1.05rem; /* Dimensione testo */
-  cursor: pointer;
-  text-decoration: none;
-  display: inline-block; /* Per allineamento e padding */
-  transition: background-color 0.3s ease, box-shadow 0.3s ease;
-  box-shadow: 0 3px 6px rgba(0, 123, 255, 0.2);
-}
-
-.btn-primary:hover {
-  background-color: #0056b3; /* Blu più scuro al hover */
-  box-shadow: 0 5px 10px rgba(0, 123, 255, 0.3);
-}
-
-/* Bottone per nuova nota*/
-.btn-new-note {
-background-color: #007bff;
-color: white;
-border: none;
-padding: 10px 20px; /* Aumento padding */
-border-radius: 8px; /* Angoli più arrotondati */
-font-size: 1.05rem; /* Leggermente più grande */
-cursor: pointer;
-text-decoration: none;
-display: inline-block; /* Per allineamento e padding */
-transition: background-color 0.3s ease, box-shadow 0.3s ease; /* Rimosso transform */
-box-shadow: 0 3px 6px rgba(0, 123, 255, 0.2); /* Ombra per il bottone */
-}
-
-.btn-new-note:hover {
-    background-color: #0056b3;
-    box-shadow: 0 5px 10px rgba(0, 123, 255, 0.3); /* Ombra più pronunciata */
-}
-
-/* Stili per il modulo di ricerca */
-.search-form {
-    display: flex;
-    gap: 15px; /* Spazio tra gli elementi */
-    margin-bottom: 30px; /* Spazio sotto il modulo */
-    flex-wrap: wrap; /* Permette il wrapping su schermi piccoli */
-}
-
-.search-form input[type="text"],
-.search-form input[type="date"] {
-    flex-grow: 1; /* Permette agli input di espandersi */
-    padding: 12px 18px; /* Padding generoso */
-    border: 1px solid #ced4da;
-    border-radius: 8px; /* Angoli arrotondati */
-    font-size: 1em;
-    box-sizing: border-box;
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-    min-width: 200px; /* Larghezza minima per gli input */
-}
-
-.search-form input[type="text"]:focus,
-.search-form input[type="date"]:focus {
-    border-color: #80bdff;
-    outline: none;
-    box-shadow: 0 0 0 0.3rem rgba(0, 123, 255, 0.2);
-}
-
-.search-form button[type="submit"] {
-    background-color: #4a627a; /* Un blu-grigio scuro per il bottone di ricerca */
-    color: white;
-    padding: 12px 25px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 1em;
-    font-weight: 500;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease; /* Rimosso transform */
-    box-shadow: 0 3px 6px rgba(74, 98, 122, 0.2);
-}
-
-.search-form button[type="submit"]:hover {
-    background-color: #3e5166; /* Scuro al hover */
-    box-shadow: 0 5px 10px rgba(74, 98, 122, 0.3);
-}
-
-/* Layout a due colonne per le note */
-.notes-content {
-    display: flex;
-    gap: 30px; /* Aumento spazio tra colonne */
-    flex-wrap: wrap;
-    align-items: flex-start;
-}
-
-.tags-sidebar {
-    flex: 0 0 250px; /* Larghezza fissa aumentata */
-    background-color: #f8fbfd; /* Azzurro molto chiaro */
-    padding: 25px; /* Aumento padding */
-    border-radius: 10px; /* Angoli più arrotondati */
-    border: 1px solid #e0e6eb;
-    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.04); /* Ombra interna più morbida */
-}
-
-.tags-sidebar h3 {
-    margin-top: 0;
-    color: #4a627a; /* Blu grigiastro */
-    font-size: 1.3em; /* Leggermente più grande */
-    margin-bottom: 20px; /* Aumento margine */
-    padding-bottom: 10px; /* Aumento padding */
-    border-bottom: 1px dashed #cce0ff; /* Colore più morbido per il bordo */
-}
-
-.tag-list, .folder-list {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.tag-list li, .folder-list li {
-    margin-bottom: 12px; /* Spazio leggermente aumentato */
-}
-
-.tag-list a, .folder-list a {
-    text-decoration: none;
-    color: #007bff;
-    padding: 8px 15px; /* Aumento padding */
-    background-color: #e9f5ff; /* Azzurro chiaro */
-    border-radius: 6px; /* Angoli più arrotondati */
-    transition: background-color 0.3s ease, color 0.3s ease;
-    display: block;
-    font-size: 0.98em;
-}
-
-.tag-list a:hover, .folder-list a:hover {
-    background-color: #cce0ff; /* Azzurro più scuro al hover */
-    color: #0056b3;
-}
-
-.notes-list {
-    flex-grow: 1;
-    min-width: 400px; /* Larghezza minima per le note aumentata */
-}
-
-.note {
-    border: 1px solid #e0e6eb;
-    padding: 25px; /* Aumento padding */
-    margin-bottom: 25px; /* Aumento margine */
-    border-radius: 10px; /* Angoli più arrotondati */
-    background-color: #fefefe;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06); /* Ombra più diffusa */
-    transition: box-shadow 0.3s ease;
-}
-
-.note:hover {
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1); /* Ombra più pronunciata al hover */
-}
-
-.note-text {
-    margin-top: 0;
-    margin-bottom: 15px; /* Spazio aumentato */
-    color: #444;
-    font-size: 1.1em; /* Leggermente più grande */
-    line-height: 1.7; /* Migliore leggibilità */
-}
-
-.note-author {
-    font-weight: 500;
-    color: #5a7d9a; /* Blu grigiastro più scuro */
-    text-align: right;
-    display: block;
-    font-size: 0.9em; /* Leggermente più grande */
-    margin-top: 12px; /* Spazio sopra l'autore */
-}
-
-.note-meta {
-    font-size: 0.85em; /* Leggermente più grande */
-    color: #777;
-    margin-top: 10px; /* Spazio aumentato */
-    border-top: 1px solid #eee;
-    padding-top: 10px; /* Spazio aumentato */
-}
-
-.note-tags span {
-    display: inline-block;
-    background-color: #e9f5ff;
-    color: #007bff;
-    padding: 4px 10px; /* Aumento padding */
-    border-radius: 5px; /* Angoli più arrotondati */
-    margin-right: 6px; /* Spazio aumentato */
-    margin-bottom: 6px; /* Spazio aumentato */
-    font-size: 0.9em;
-    font-weight: 500; /* Leggermente più grassetto */
-}
-.note-folder {
-    font-style: italic;
-    color: #6c757d;
-}
-
-/* Form Generico (per #noteForm e per gli altri form) */
-#noteForm label,
-form label { /* Ho esteso a tutti i tag <label> dentro un form */
-    display: block;
-    margin-bottom: 10px; /* Spazio aumentato */
-    font-weight: 500;
-    color: #4a627a;
-    margin-top: 20px; /* Spazio aumentato */
-}
-
-/* Stili per i campi input e textarea con classe form-control */
-.form-control {
-    width: 100%;
-    padding: 14px 18px; /* Aumento padding */
-    margin-bottom: 20px; /* Spazio aumentato */
-    border: 1px solid #ced4da;
-    border-radius: 8px; /* Angoli più arrotondati */
-    font-family: 'Roboto', sans-serif;
-    font-size: 1.05em; /* Leggermente più grande */
-    box-sizing: border-box;
-    resize: vertical;
-    min-height: 45px; /* Altezza minima aumentata */
-    max-height: 250px; /* Max height for textarea */
-    transition: border-color 0.3s ease, box-shadow 0.3s ease;
-}
-
-.form-control:focus {
-    border-color: #80bdff;
-    outline: none;
-    box-shadow: 0 0 0 0.3rem rgba(0, 123, 255, 0.2); /* Ombra focus più morbida */
-}
-
-/* Nuovo stile per il gruppo di checkbox (per averle affiancate) */
-.checkbox-group {
-    display: flex;
-    flex-wrap: wrap; /* Permette alle checkbox di andare a capo su schermi piccoli */
-    gap: 25px; /* Spazio tra le checkbox */
-    margin-bottom: 15px; /* Spazio sotto il gruppo */
-}
-
-/* Stile per le checkbox (etichetta) */
-.checkbox-label {
-    display: flex; /* Per allineare meglio checkbox e testo */
-    align-items: center;
-    font-weight: normal; /* Non grassetto per il testo della label */
-    color: #333;
-    font-size: 1em;
-}
-
-.checkbox-label input[type="checkbox"] {
-    margin-right: 10px; /* Spazio tra checkbox e testo */
-    width: 18px; /* Dimensioni checkbox */
-    height: 18px;
-    cursor: pointer;
-}
-
-
-/* Stile per il bottone di aggiunta/salvataggio nota */
-.add-note-btn { /* Questo può usare .btn-primary */
-    background-color: #28a745; /* Verde */
-    color: white;
-    padding: 14px 30px; /* Aumento padding */
-    border: none;
-    border-radius: 8px; /* Angoli più arrotondati */
-    cursor: pointer;
-    font-size: 1.1em; /* Leggermente più grande */
-    font-weight: 500;
-    transition: background-color 0.3s ease, box-shadow 0.3s ease;
-    display: block;
-    width: 100%;
-    margin-top: 25px; /* Spazio sopra il bottone aumentato */
-    box-shadow: 0 3px 6px rgba(40, 167, 69, 0.2);
-}
-
-.add-note-btn:hover {
-    background-color: #218838; /* Verde più scuro */
-    box-shadow: 0 5px 10px rgba(40, 167, 69, 0.3);
-}
-
-/* Stili per i bottoni di azione (Elimina/Salva, ecc.) */
-.delete-note-btn {
-      background-color: #dc3545;
-      color: white;
-      padding: 8px 18px; /* Aumento padding */
-      border: none;
-      border-radius: 6px; /* Angoli più arrotondati */
-      cursor: pointer;
-      font-size: 0.95em; /* Leggermente più grande */
-      transition: background-color 0.3s ease;
-      margin-top: 8px; /* Spazio aumentato */
-      margin-bottom: 8px; /* Spazio aumentato */
-      box-shadow: 0 2px 4px rgba(220, 53, 69, 0.2);
-}
-
-.delete-note-btn:hover {
-    background-color: #c82333;
-    box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
-}
-
-.save-note-btn {
-      background-color: #1dd335;
-      color: white;
-      padding: 8px 18px; /* Aumento padding */
-      border: none;
-      border-radius: 6px; /* Angoli più arrotondati */
-      cursor: pointer;
-      font-size: 0.95em; /* Leggermente più grande */
-      transition: background-color 0.3s ease;
-      margin-top: 8px; /* Spazio aumentato */
-      margin-bottom: 8px; /* Spazio aumentato */
-      box-shadow: 0 2px 4px rgba(29, 211, 53, 0.2);
-}
-
-.save-note-btn:hover {
-    background-color: #1ee439;
-    box-shadow: 0 4px 8px rgba(29, 211, 53, 0.3);
-}
-
-
-#noteMessage {
-    color: #28a745; /* Verde per i messaggi di successo */
-    margin-top: 20px; /* Spazio aumentato */
-    font-weight: 500;
-    text-align: center;
-    font-size: 1.1em; /* Leggermente più grande */
-}
-
-footer {
-    background-color: #34495e; /* Blu-grigio scuro */
-    color: white;
-    text-align: center;
-    font-size: 0.9em;
-    padding: 30px; /* Aumento padding */
-    margin-top: 50px; /* Aumento margine superiore */
-    box-shadow: 0 -6px 15px rgba(0, 0, 0, 0.1); /* Ombra più pronunciata ma morbida */
-}
-
-footer small {
-    color: #cad3dc; /* Grigio-azzurro chiaro */
-}
-
-.profile-container {
-    display: flex;
-    gap: 20px;
-}
-.tags-sidebar {
-    width: 200px;
-    background: #f4f4f4;
-    padding: 10px;
-    border-radius: 8px;
-}
-.tags-sidebar ul {
-    list-style: none;
-    padding: 0;
-}
-.tags-sidebar li {
-    margin: 8px 0;
-}
-.tags-sidebar a {
-    text-decoration: none;
-    color: #333;
-}
-.notes-area {
-    flex: 1;
-}
-.note-card {
-    background: #fff;
-    border: 1px solid #ddd;
-    padding: 15px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-}
-.note-card form,
-.note-card a {
-    display: inline-block;
-    margin-right: 8px;
-}
-.note-card button {
-    padding: 8px 15px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    background-color: #007BFF;
-    color: #fff;
-    font-weight: bold;
-}
-.note-card button:hover {
-    background-color: #0056b3;
-}
-.permission-section {
-    margin-top: 20px;
-    background-color: #f9f9f9;
-    padding: 10px;
-    border-radius: 8px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-.permission-section label {
-    font-weight: bold;
-}
-.permission-section input[type="checkbox"] {
-    margin-right: 10px;
-}
-.permission-section .permission-btn {
-    background-color: #28a745;
-    color: white;
-}
-.permission-section .permission-btn:hover {
-    background-color: #218838;
-}
-.permission-section .permission-cancel {
-    background-color: #dc3545;
-    color: white;
-}
-.permission-section .permission-cancel:hover {
-    background-color: #c82333;
-}
-
-/* Media Queries per la responsività */
-@media (max-width: 768px) {
-    .navbar {
-        flex-direction: column;
-        align-items: flex-start;
-    }
-    .site-title {
-        margin-bottom: 15px; /* Spazio aumentato */
-    }
-    .profile {
-        width: 100%;
-        text-align: left;
-        margin-top: 15px; /* Spazio aumentato */
-    }
-    .container {
-        padding: 0 20px; /* Aumento padding sui lati */
-    }
-    .welcome-section,
-    .notes-section,
-    .new-note-section {
-        padding: 25px; /* Aumento padding */
-        margin-bottom: 30px; /* Spazio aumentato */
-    }
-    .notes-content {
-        flex-direction: column;
-        gap: 25px; /* Spazio aumentato */
-    }
-    .tags-sidebar {
-        flex: auto;
-        width: 100%;
-        margin-bottom: 20px; /* Spazio aumentato */
-    }
-    .notes-list {
-        min-width: unset;
-        width: 100%;
-    }
-    h1 {
-        font-size: 2.2em; /* Adattato per schermi piccoli */
-    }
-    h2 {
-        font-size: 1.7em; /* Adattato per schermi piccoli */
-    }
-    .search-form {
-        flex-direction: column;
-        gap: 10px;
-    }
-    .search-form .form-control,
-    .search-form button[type="submit"] {
-        width: 100%; /* Occupano tutta la larghezza */
-        min-width: unset;
-    }
-    .checkbox-group {
-        flex-direction: column; /* Impila le checkbox su schermi piccoli */
-        gap: 10px; /* Riduci il gap */
-    }
-    .add-note-btn,
-    .delete-note-btn,
-    .save-note-btn,
-    .btn-primary { /* Adattamento per i bottoni generici */
-        padding: 12px 20px; /* Padding leggermente ridotto per mobile */
-        font-size: 1em; /* Dimensione testo adattata */
-    }
-}
-
-@media (max-width: 480px) {
-    header {
-        padding: 15px;
-    }
-    .site-title {
-        font-size: 1.9em; /* Ancora più piccolo */
-    }
-    .profile {
-        font-size: 0.9em;
-    }
-    .welcome-section,
-    .notes-section,
-    .new-note-section {
-        padding: 20px; /* Ulteriore riduzione padding */
-    }
-    h1 {
-        font-size: 2em; /* Ulteriore riduzione */
-    }
-    h2 {
-        font-size: 1.5em; /* Ulteriore riduzione */
-    }
-    .note {
-        padding: 20px; /* Riduzione padding */
-    }
-    .note-text {
-        font-size: 1em; /* Riduzione font size */
-    }
-    .form-control { /* Usare la classe generica */
-        padding: 12px 15px; /* Riduzione padding */
-        font-size: 1em; /* Riduzione font size */
-    }
-}
+footer{ text-align:center; color:var(--muted); padding:16px 0 40px; }
