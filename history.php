@@ -69,7 +69,7 @@ $csrf = $_SESSION['csrf_token'];
 <head>
   <meta charset="utf-8">
   <title>Cronologia - <?= h($nota['titolo']) ?> - Nota Bene</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
 <header>

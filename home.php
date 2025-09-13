@@ -82,7 +82,7 @@ $cartelle = $resultCartelle->fetch_all(MYSQLI_ASSOC);
 <head>
   <meta charset="UTF-8">
   <title>Home - Nota Bene</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
 <header>
