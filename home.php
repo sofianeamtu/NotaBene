@@ -1,8 +1,6 @@
 <?php
-require_once __DIR__.'/db_connection.php';
-require_once __DIR__.'/perm_helper.php';
 session_start();
-$me = $_SESSION['utente'] ?? null;
+include 'db_connection.php';
 
 if (!isset($_SESSION['utente'])) {
     header("Location: login.php");
