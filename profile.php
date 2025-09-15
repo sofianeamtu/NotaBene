@@ -1,4 +1,4 @@
-<?php
+<?php 
 $secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on');
 session_set_cookie_params(['httponly'=>true,'samesite'=>'Lax','secure'=>$secure]);
 session_start();
@@ -8,6 +8,11 @@ require_once __DIR__.'/perm_helper.php';
 
 if (empty($_SESSION['utente'])) { header('Location: login.php'); exit; }
 $me = $_SESSION['utente'];
+
+// CSRF token (una volta a sessione)
+if (empty($_SESSION['csrf_token'])) {
+  $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+}
 
 function h($s){ return htmlspecialchars($s ?? '', ENT_QUOTES, 'UTF-8'); }
 function fetch_all_assoc(mysqli_stmt $stmt): array {
@@ -21,6 +26,7 @@ function fetch_all_assoc(mysqli_stmt $stmt): array {
 try {
   $filterFolder = isset($_GET['cartella']) ? trim((string)$_GET['cartella']) : '';
 
+  // Le mie note (con eventuale filtro cartella)
   if ($filterFolder !== '') {
     $sqlMine = "
       SELECT id, titolo, data_ultima_modifica, pubblica, allow_edit, cartella, tag
@@ -43,6 +49,7 @@ try {
   $stmt->execute();
   $mine = fetch_all_assoc($stmt);
 
+  // Condivise con me
   $sqlShared = "
     SELECT n.id, n.titolo, n.autore, n.data_ultima_modifica, n.pubblica, s.permesso
     FROM Note n
@@ -55,6 +62,7 @@ try {
   $stmt->execute();
   $shared = fetch_all_assoc($stmt);
 
+  // Note copiate (titolo che inizia con 'Copia di ' o tag che contiene 'copiata')
   $sqlCopied = "
     SELECT id, titolo, data_ultima_modifica, cartella
     FROM Note
@@ -67,6 +75,7 @@ try {
   $stmt->execute();
   $copied = fetch_all_assoc($stmt);
 
+  // Cartelle
   $sqlFolders = "
     SELECT t.cartella, t.cnt
     FROM (
@@ -86,7 +95,7 @@ try {
 } catch (Throwable $e) {
   error_log('PROFILE ERROR: '.$e->getMessage().' @ '.$e->getFile().':'.$e->getLine());
   http_response_code(500);
-  echo "<pre>Errore interno: ".$e->getMessage()."</pre>";
+  echo "<pre>Errore interno: ".h($e->getMessage())."</pre>";
   exit;
 }
 ?>
@@ -185,7 +194,9 @@ try {
             <span class="actions">
               <a class="btn secondary" href="form_modifica.php?id=<?= (int)$n['id'] ?>">Modifica</a>
               <form action="delete_note.php" method="POST" onsubmit="return confirm('Eliminare questa nota?');" style="margin:0;display:inline-block">
-                <input type="hidden" name="id" value="<?= (int)$n['id'] ?>">
+                <input type="hidden" name="note_id" value="<?= (int)$n['id'] ?>">
+                <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                <input type="hidden" name="redirect" value="<?= htmlspecialchars($_SERVER['REQUEST_URI']) ?>">
                 <button type="submit" class="btn danger">Elimina</button>
               </form>
               <a class="btn secondary" href="history.php?id=<?= (int)$n['id'] ?>">Cronologia</a>
@@ -214,6 +225,12 @@ try {
           </div>
           <div class="actions">
             <a class="btn secondary" href="form_modifica.php?id=<?= (int)$c['id'] ?>">Apri</a>
+            <form action="delete_note.php" method="POST" onsubmit="return confirm('Eliminare questa nota?');" style="margin:0;display:inline-block">
+              <input type="hidden" name="note_id" value="<?= (int)$c['id'] ?>">
+              <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+              <input type="hidden" name="redirect" value="<?= htmlspecialchars($_SERVER['REQUEST_URI']) ?>">
+              <button type="submit" class="btn danger">Elimina</button>
+            </form>
           </div>
         </div>
       <?php endforeach; ?>
@@ -242,6 +259,13 @@ try {
             <span class="actions">
               <a class="btn secondary" href="form_modifica.php?id=<?= (int)$s['id'] ?>">Apri</a>
               <a class="btn secondary" href="history.php?id=<?= (int)$s['id'] ?>">Cronologia</a>
+              <!-- Rimuovimi dalla condivisione -->
+              <form action="delete_note.php" method="POST" style="display:inline-block" onsubmit="return confirm('Vuoi rimuovere questa nota condivisa dal tuo profilo?');">
+                <input type="hidden" name="note_id" value="<?= (int)$s['id'] ?>">
+                <input type="hidden" name="csrf_token" value="<?= $_SESSION['csrf_token'] ?>">
+                <input type="hidden" name="redirect" value="<?= htmlspecialchars($_SERVER['REQUEST_URI']) ?>">
+                <button type="submit" class="btn secondary">Rimuovimi</button>
+              </form>
             </span>
           </div>
         </div>
