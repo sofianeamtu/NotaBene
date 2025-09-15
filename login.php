@@ -1,178 +1,107 @@
 <?php
-include 'db_connection.php'; // Assumo che questa apra la connessione $conn MySQLi
+$secure = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS']==='on');
+session_set_cookie_params(['httponly'=>true,'samesite'=>'Lax','secure'=>$secure]);
 session_start();
 
-$errore = "";
+require_once __DIR__.'/db_connection.php';
 
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $username = trim($_POST["username"]);
-    $password = trim($_POST["password"]);
+function h($s){ return htmlspecialchars($s ?? '', ENT_QUOTES, 'UTF-8'); }
 
-    if (empty($username) || empty($password)) {
-        $errore = "Compila tutti i campi obbligatori.";
-    } else {
-        $stmt = $conn->prepare("SELECT password FROM Utente WHERE username = ?");
-        $stmt->bind_param("s", $username);
-        $stmt->execute();
-        $stmt->store_result();
+// se già loggato → profilo
+if (!empty($_SESSION['utente'])) {
+  header('Location: profile.php'); exit;
+}
 
-        if ($stmt->num_rows === 1) {
-            $stmt->bind_result($hashedPassword);
-            $stmt->fetch();
+// flash (da register.php)
+$flash_success = $_SESSION['flash_success'] ?? '';
+$flash_error   = $_SESSION['flash_error'] ?? '';
+unset($_SESSION['flash_success'], $_SESSION['flash_error']);
 
-            if (password_verify($password, $hashedPassword)) {
-                $_SESSION["loggedin"] = true;
-                $_SESSION["utente"] = $username;  // <-- importante: usa 'utente' come nelle altre pagine
+$username = '';
+if ($_SERVER['REQUEST_METHOD']==='POST') {
+  $username = trim($_POST['username'] ?? '');
+  $password = $_POST['password'] ?? '';
+  if ($username === '' || $password === '') {
+    $flash_error = 'Inserisci username e password';
+  } else {
+    $stmt = $conn->prepare('SELECT password FROM Utente WHERE username = ?');
+    $stmt->bind_param('s', $username);
+    $stmt->execute();
+    $res = $stmt->get_result();
+    $row = $res->fetch_assoc();
+    $stmt->close();
 
-                $stmt->close();
-                $conn->close();
+    if ($row) {
+      $hashed = $row['password'];
+      $ok = password_verify($password, $hashed);
+      // fallback se avete password in chiaro:
+      // $ok = $ok || ($password === $hashed);
 
-                header("Location: profile.php");
-                exit;
-            } else {
-                $errore = "Password errata.";
-            }
-        } else {
-            $errore = "Utente non trovato.";
-        }
-
-        $stmt->close();
+      if ($ok) {
+        $_SESSION['utente'] = $username;
+        header('Location: profile.php'); exit;
+      }
     }
-
-    $conn->close();
+    $flash_error = 'Credenziali non valide';
+  }
 }
 ?>
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="it">
 <head>
-  <meta charset="UTF-8">
-  <title>Login</title>
+  <meta charset="utf-8">
+  <title>Accedi – Nota Bene</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body{background:#f8fafc;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial}
+    .wrap{max-width:460px;margin:60px auto;padding:0 16px}
+    .card{background:#fff;padding:24px 22px;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.08)}
+    h1{margin:0 0 16px 0;font-size:1.5rem}
+    .meta{color:#6b7280;font-size:.95em;margin-bottom:18px}
+    .field{margin-bottom:14px}
+    label{display:block;font-weight:600;margin-bottom:6px}
+    input[type="text"],input[type="password"]{width:100%;padding:10px 12px;border:1px solid #e5e7eb;border-radius:10px;font-size:1rem}
+    .btn{display:inline-block;background:#2563eb;color:#fff;padding:10px 16px;border-radius:10px;text-decoration:none;border:none;cursor:pointer}
+    .btn.secondary{background:#f3f4f6;color:#111827;border:1px solid #e5e7eb}
+    .row{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
+    .alerts{margin-bottom:12px}
+    .alert{padding:10px 12px;border-radius:10px;margin-bottom:8px;font-size:.95em}
+    .alert.success{background:#e9f8ee;border:1px solid #cfead8;color:#14532d}
+    .alert.error{background:#fde8e8;border:1px solid #f8b4b4;color:#7f1d1d}
+  </style>
 </head>
-<style>
-
-body {
-  background: #e8f4f8;
-  font-family: Arial, sans-serif;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  margin: 0;
-  color: #333;
-}
-
-.container {
-  background-color: #fff;
-  padding: 30px 25px;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  width: 100%;
-  max-width: 400px;
-  text-align: center;
-  box-sizing: border-box;
-}
-
-h2 {
-  margin-bottom: 20px;
-  color: #16a085;
-  text-align: center;
-}
-
-#message {
-  color: red;
-  margin-bottom: 15px;
-  font-size: 13px;
-  text-align: center;
-  min-height: 18px;
-}
-
-form {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
-}
-
-label {
-  text-align: left;
-  font-weight: bold;
-  margin-bottom: 5px;
-  color: #27ae60;
-  font-size: 14px;
-}
-
-input[type="text"],
-input[type="password"] {
-  width: 100%;
-  padding: 10px 8px;
-  border-radius: 8px;
-  border: 1.5px solid #1abc9c;
-  font-size: 14px;
-  transition: border-color 0.3s ease;
-  outline: none;
-  box-sizing: border-box;
-}
-
-input:focus {
-  border-color: #16a085;
-  box-shadow: 0 0 5px rgba(22,160,133,0.5);
-}
-
-button[type="submit"],
-button {
-  width: 100%;
-  padding: 12px 0;
-  background-color: #16a085;
-  border: none;
-  border-radius: 8px;
-  color: white;
-  font-weight: bold;
-  font-size: 16px;
-  cursor: pointer;
-  transition: background-color 0.25s ease;
-}
-
-button:hover {
-  background-color: #117a65;
-}
-
-p {
-  text-align: center;
-  font-size: 14px;
-  margin-top: 20px;
-}
-
-p a {
-  color: #16a085;
-  text-decoration: none;
-}
-
-p a:hover {
-  text-decoration: underline;
-}
-</style>
 <body>
-  <div class="container">
-    <h2>Login</h2>
-    
-    <?php if (!empty($errore)): ?>
-      <div id="message"><?= htmlspecialchars($errore) ?></div>
-    <?php else: ?>
-      <div id="message"></div>
-    <?php endif; ?>
-
-    <form method="post" action="">
-        <label for="loginUsername">Username:</label>
-        <input type="text" name="username" id="loginUsername" required>
-
-        <label for="loginPassword">Password:</label>
-        <input type="password" name="password" id="loginPassword" required>
-
-        <button type="submit">Accedi</button>
-    </form>
-
-
-    <p>Non hai un account? <a href="register.php">Registrati</a></p>
+<header>
+  <div class="navbar">
+    <div class="site-title">Nota Bene</div>
   </div>
+</header>
+
+<main class="wrap">
+  <div class="card">
+    <h1>Accedi</h1>
+    <p class="meta">Inserisci le tue credenziali per entrare.</p>
+
+    <div class="alerts">
+      <?php if ($flash_success): ?><div class="alert success"><?= h($flash_success) ?></div><?php endif; ?>
+      <?php if ($flash_error):   ?><div class="alert error"><?= h($flash_error) ?></div><?php endif; ?>
+    </div>
+
+    <form method="post" action="login.php" autocomplete="on">
+      <div class="field">
+        <label for="username">Username</label>
+        <input id="username" name="username" type="text" required maxlength="100" value="<?= h($username) ?>">
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" name="password" type="password" required>
+      </div>
+      <div class="row">
+        <button class="btn" type="submit">Entra</button>
+        <a class="btn secondary" href="register.php">Crea un account</a>
+      </div>
+    </form>
+  </div>
+</main>
 </body>
 </html>
